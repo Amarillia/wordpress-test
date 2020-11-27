@@ -1,0 +1,51 @@
+version: '3.3'
+services:
+    wwww:
+        image: worpress
+        container_name: wptest_www
+        ports:
+            - "8003:80"
+        volumes:
+            - ./www:/var/www/html/
+        links:
+            - database
+        networks:
+            - wptest
+    database:
+        image: mysql:5.7
+        container_name: wptest_database
+        command: ['--character-set-server=utf8mb4',
+        '--collation-server=utf8mb4_unicode_ci',
+        '--default-authentication-plugin=mysql_native_password']
+        ports:
+            - "3306:3306"
+        environment:
+            MYSQL_DATABASE: wptest
+            MYSQL_USER: wptest
+            MYSQL_PASSWORD: wptest
+            MYSQL_ROOT_PASSWORD: wptest
+        volumes:
+            - ./dump:/docker-entrypoint-initdb.d
+            - wptest_db:/var/lib/mysql
+        networks:
+            - wptest
+        
+    databaseadmin:
+        image: phpmyadmin/phpmyadmin:4.8
+        container_name: wptest_phpmyadmin
+        links:
+            - database:database
+        ports:
+            - 8004:80
+        environment: 
+            MYSQL_ROOT_PASSWORD: wptest
+            MYSQL_USER: wptest
+            MYSQL_PASSWORD: wptest
+            MYSQL_ROOT_PASSWORD: wptest
+            PMA_HOST: wptest
+        networks:
+            - wptest
+networks:
+    wptest:
+volumes:
+    wptest_db:
